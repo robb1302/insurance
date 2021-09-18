@@ -1,0 +1,20 @@
+# Requirements for project
+fpdf==1.7.2
+Keras==2.3.1
+matplotlib==3.2.1
+pandas==1.0.4
+tensorflow==2.2.0
+scikit-learn==0.23.1
+seaborn==0.10.1
+tensorflow==2.2.0
+xgboost==1.1.0
+sphinx==3.1.0
+jedi== 0.18.0
+hyperopt == 0.2.4
+ppscore == 0.0.3
+imblearn == 0.0
+tpot==0.11.5
+lifelines==0.24.15
+category_encoders==2.2.2
+seaborn==0.10.1
+#shap == 0.35.0
