@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+from src.settings.years import years as YEARS
+
+def prepare_data(data, bool_return=False, bool_log = False):
+    """
+    prepares data for modelling and analysis
+    """
+
+    print('Start: Preparation')
+    years_names = [str(y) for y in YEARS]
+    data[years_names] = log_data(data=data[years_names] ,bool_log= bool_log)
+
+    data = return_value_data(data=data,years_names=years_names,bool_return=bool_return)
+
+    data = data.drop(['Unnamed: 65'],axis=1, errors='ignore')
+
+    # NA mit mean
+    fixed_data_years = data[years_names].apply(lambda x: x.fillna(x.mean()),axis=1)
+    data = data.drop(years_names,axis=1,errors='ignore')
+    data = pd.concat([data,fixed_data_years],axis=1)
+    data = data.set_index("Country Name")
+
+    return data
+
+def log_data(data,bool_log):
+    """
+    loa dataset
+    """
+    if bool_log:
+        data = np.log(data)
+    return data
+
+def return_value_data(data,years_names,bool_return):
+    """
+    calcualtes return data
+    """
+
+    if bool_return:
+        # create columns names
+        years_change_names = [i+'_change_abs' for i in list(years_names)]
+        years_change_names.sort()
+        # Create diff
+        data_change_gdp = data[years_names].transpose(
+        ).sort_index().transpose().diff(axis=1)
+        data_change_gdp.columns = years_names
+        # drop yearnames 
+        data = data.drop(years_names, errors='ignore')
+        # add new data to data
+        data = pd.concat([data, data_change_gdp], axis=1)
+    else:
+        data[years_names].transpose().sort_index().transpose()
+    return data
