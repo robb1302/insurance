@@ -21,4 +21,4 @@ def import_data(country):
         gj = geojson.load(f)
     features = gj['features'][0]
 
-    return data
+    return data,gj

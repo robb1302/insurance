@@ -20,7 +20,7 @@ def prepare_data(data, bool_return=False, bool_log=False):
     # NA mit mean
     data = fix_na_data(data=data, years_names=years_names)
 
-    data = data.set_index("Country Name")
+    data = data.set_index("Country Name",drop=False)
 
     return data
 
@@ -56,9 +56,28 @@ def return_value_data(data, years_names, bool_return):
         ).sort_index().transpose().diff(axis=1)
         data_change_gdp.columns = years_names
         # drop yearnames
-        data = data.drop(years_names, errors='ignore')
+        data = data.drop(years_names, errors='ignore',axis=1)
         # add new data to data
         data = pd.concat([data, data_change_gdp], axis=1)
     else:
         data[years_names].transpose().sort_index().transpose()
     return data
+
+def merge_data(data,geo_data):
+    # Unpivot Jahres Werte
+    properties_tsunami = pd.DataFrame([f["properties"] for f in geo_data['features']])
+    melt_gdp = pd.melt(data,id_vars=["Country Name","Country Code","Indicator Name","Indicator Code"])
+    melt_gdp = melt_gdp.rename(columns={"variable": "YEAR", "Country Name": "COUNTRY",'value':'GDP_Value'})
+
+    properties_tsunami.index=properties_tsunami['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ properties_tsunami['YEAR'].apply(lambda x:str(x))
+    melt_gdp.index=melt_gdp['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ melt_gdp['YEAR'].apply(lambda x:str(x))
+    #df_tsunami_properties_gdp = pd.concat([properties_tsunami,melt_gdp],axis=0,sort=False)
+    df_tsunami_properties_gdp = properties_tsunami.join(melt_gdp,rsuffix='_delete')
+    
+    # Choose only month gdp
+    df_tsunami_properties_gdp = df_tsunami_properties_gdp[(df_tsunami_properties_gdp['YEAR'].astype('int')>1959) &(df_tsunami_properties_gdp['YEAR'].astype('int')<2021)]
+
+    # ignore not matched data
+    # TODO   
+    df_tsunami_properties_gdp = df_tsunami_properties_gdp.drop(df_tsunami_properties_gdp.index[df_tsunami_properties_gdp.GDP_Value.isna()])
+    return df_tsunami_properties_gdp
