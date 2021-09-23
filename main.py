@@ -1,4 +1,4 @@
-from src.main_function.main_funcion import create_model
+from src.main_function.main_funcion import insurance_weather_model
 import argparse
 
 # TODO: correct help text for all arguments
@@ -12,5 +12,5 @@ parser.add_argument(
 
 args = parser.parse_args()
 if __name__ == '__main__':
-    create_model(country=args.country)
+    insurance_weather_model(country=args.country)
     print('hello')

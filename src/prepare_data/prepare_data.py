@@ -3,7 +3,7 @@ import numpy as np
 from src.config.settings import years as YEARS
 
 
-def prepare_data(data, bool_return=False, bool_log=False):
+def prepare_data_creation(data, bool_return=False, bool_log=False):
     """
     prepares data for modelling and analysis
     """
@@ -72,12 +72,12 @@ def merge_data(data,geo_data):
     properties_tsunami.index=properties_tsunami['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ properties_tsunami['YEAR'].apply(lambda x:str(x))
     melt_gdp.index=melt_gdp['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ melt_gdp['YEAR'].apply(lambda x:str(x))
     #df_tsunami_properties_gdp = pd.concat([properties_tsunami,melt_gdp],axis=0,sort=False)
-    df_tsunami_properties_gdp = properties_tsunami.join(melt_gdp,rsuffix='_delete')
+    df_tsunami_properties_gdp = melt_gdp.join(properties_tsunami,rsuffix='_delete')
     
     # Choose only month gdp
     df_tsunami_properties_gdp = df_tsunami_properties_gdp[(df_tsunami_properties_gdp['YEAR'].astype('int')>1959) &(df_tsunami_properties_gdp['YEAR'].astype('int')<2021)]
 
     # ignore not matched data
     # TODO   
-    df_tsunami_properties_gdp = df_tsunami_properties_gdp.drop(df_tsunami_properties_gdp.index[df_tsunami_properties_gdp.GDP_Value.isna()])
+    #df_tsunami_properties_gdp = df_tsunami_properties_gdp.drop(df_tsunami_properties_gdp.index[df_tsunami_properties_gdp.GDP_Value.isna()])
     return df_tsunami_properties_gdp
