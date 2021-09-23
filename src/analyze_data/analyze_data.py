@@ -1,4 +1,4 @@
-from src.settings.years import years as YEARS
+from src.config.settings import years as YEARS
 import matplotlib.pyplot as plt
 import seaborn as sns
 import src.utils.globals as GLOBALS

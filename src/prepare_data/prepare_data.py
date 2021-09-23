@@ -1,29 +1,39 @@
 import pandas as pd
 import numpy as np
-from src.settings.years import years as YEARS
+from src.config.settings import years as YEARS
 
-def prepare_data(data, bool_return=False, bool_log = False):
+
+def prepare_data(data, bool_return=False, bool_log=False):
     """
     prepares data for modelling and analysis
     """
 
     print('Start: Preparation')
     years_names = [str(y) for y in YEARS]
-    data[years_names] = log_data(data=data[years_names] ,bool_log= bool_log)
+    data[years_names] = log_data(data=data[years_names], bool_log=bool_log)
 
-    data = return_value_data(data=data,years_names=years_names,bool_return=bool_return)
+    data = return_value_data(
+        data=data, years_names=years_names, bool_return=bool_return)
 
-    data = data.drop(['Unnamed: 65'],axis=1, errors='ignore')
+    data = data.drop(['Unnamed: 65'], axis=1, errors='ignore')
 
     # NA mit mean
-    fixed_data_years = data[years_names].apply(lambda x: x.fillna(x.mean()),axis=1)
-    data = data.drop(years_names,axis=1,errors='ignore')
-    data = pd.concat([data,fixed_data_years],axis=1)
+    data = fix_na_data(data=data, years_names=years_names)
+
     data = data.set_index("Country Name")
 
     return data
 
-def log_data(data,bool_log):
+
+def fix_na_data(data, years_names):
+    fixed_data_years = data[years_names].apply(
+        lambda x: x.fillna(x.mean()), axis=1)
+    data = data.drop(years_names, axis=1, errors='ignore')
+    data = pd.concat([data, fixed_data_years], axis=1)
+    return data
+
+
+def log_data(data, bool_log):
     """
     loa dataset
     """
@@ -31,7 +41,8 @@ def log_data(data,bool_log):
         data = np.log(data)
     return data
 
-def return_value_data(data,years_names,bool_return):
+
+def return_value_data(data, years_names, bool_return):
     """
     calcualtes return data
     """
@@ -44,7 +55,7 @@ def return_value_data(data,years_names,bool_return):
         data_change_gdp = data[years_names].transpose(
         ).sort_index().transpose().diff(axis=1)
         data_change_gdp.columns = years_names
-        # drop yearnames 
+        # drop yearnames
         data = data.drop(years_names, errors='ignore')
         # add new data to data
         data = pd.concat([data, data_change_gdp], axis=1)
