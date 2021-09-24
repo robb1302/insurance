@@ -21,8 +21,6 @@ from sklearn.tree import DecisionTreeClassifier
 
 def create_model(data,target):
 
-    
-
     data = data[data.columns[(data.dtypes!='object')]]
     data = data.drop(['ID','OBJECTID','SECOND','DAY','MONTH','HOUR','MINUTE','REGION_CODE','YEAR_delete','COUNTRY_delete'],axis=1,errors='ignore')
     #data = data.fillna(data.mean())
@@ -33,6 +31,8 @@ def create_model(data,target):
     y = data[target] > 0
     X_train, X_validation, Y_train, Y_validation = train_test_split(X, y, test_size=0.20, random_state=1,stratify=y) 
     
+    print('Train: \n','True:',Y_train.sum(),'\n','False:',len(Y_train)-Y_train.sum(),'\n')
+    print('Test: \n','True:',Y_validation.sum(),'\n','False:',len(Y_validation)-Y_validation.sum(),'\n')
 
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
@@ -45,11 +45,11 @@ def create_model(data,target):
 
 
     models = []
-    models.append(('LR', LogisticRegression(solver='liblinear', multi_class='ovr')))
-    models.append(('LDA', LinearDiscriminantAnalysis()))
-    models.append(('KNN', KNeighborsClassifier()))
-    models.append(('CART', DecisionTreeClassifier()))
-    models.append(('NB', GaussianNB()))
+    # models.append(('LR', LogisticRegression(solver='liblinear', multi_class='ovr')))
+    # models.append(('LDA', LinearDiscriminantAnalysis()))
+    # models.append(('KNN', KNeighborsClassifier()))
+    # models.append(('CART', DecisionTreeClassifier()))
+    # models.append(('NB', GaussianNB()))
     models.append(('SVM', SVC(gamma='auto')))
     models.append(('RF',RandomForestClassifier()))
 
@@ -59,7 +59,7 @@ def create_model(data,target):
     for name, model in models:
         print('-'*100)
         kfold = StratifiedKFold(n_splits=10, random_state=1, shuffle=True)
-        cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring='roc_auc')
+        cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring='accuracy')
         results.append(cv_results)
         names.append(name)
         print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
@@ -67,11 +67,12 @@ def create_model(data,target):
         model.fit(X_train, Y_train)
         predictions = model.predict(X_validation)
 
-        print('ACC:',accuracy_score(Y_validation, predictions))
-        print('ROC: ',roc_auc_score(Y_validation, predictions))
-        print('F1: ',f1_score(Y_validation, predictions))
+        N = 4
+        print('ACC: ',np.round(accuracy_score(Y_validation, predictions),N))
+        print('ROC: ',np.round(roc_auc_score(Y_validation, predictions),N))
+        print('F1: ',np.round(f1_score(Y_validation, predictions),N))
         print()
-        print(np.round(confusion_matrix(Y_validation, predictions,normalize='true'),2))
+        print(np.round(confusion_matrix(Y_validation, predictions,normalize='true'),3))
         print(confusion_matrix(Y_validation, predictions))
         print(classification_report(Y_validation, predictions))
     print('-'*100)

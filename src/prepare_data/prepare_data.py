@@ -63,17 +63,30 @@ def return_value_data(data, years_names, bool_return):
         data[years_names].transpose().sort_index().transpose()
     return data
 
-def merge_data(data,geo_data):
+def merge_data(data,geo_data, bool_all_gdp = False):
+    """
+    merge GDP und weather data  
+    """    
     # Unpivot Jahres Werte
     properties_tsunami = pd.DataFrame([f["properties"] for f in geo_data['features']])
+    # unpivot
     melt_gdp = pd.melt(data,id_vars=["Country Name","Country Code","Indicator Name","Indicator Code"])
     melt_gdp = melt_gdp.rename(columns={"variable": "YEAR", "Country Name": "COUNTRY",'value':'GDP_Value'})
 
+    # set index weather data
     properties_tsunami.index=properties_tsunami['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ properties_tsunami['YEAR'].apply(lambda x:str(x))
+
+    # set index gdp data
     melt_gdp.index=melt_gdp['COUNTRY'].apply(lambda x:x.lower().replace(' ','_'))+'__'+ melt_gdp['YEAR'].apply(lambda x:str(x))
-    #df_tsunami_properties_gdp = pd.concat([properties_tsunami,melt_gdp],axis=0,sort=False)
-    df_tsunami_properties_gdp = melt_gdp.join(properties_tsunami,rsuffix='_delete')
-    
+
+
+    if bool_all_gdp:
+        #keep all gdp data and merge tsunami where possible
+        df_tsunami_properties_gdp = melt_gdp.join(properties_tsunami,rsuffix='_delete')
+    else:
+        #keep all wether data and merge gdp where possible
+        df_tsunami_properties_gdp = properties_tsunami.join(melt_gdp,rsuffix='_delete')
+
     # Choose only month gdp
     df_tsunami_properties_gdp = df_tsunami_properties_gdp[(df_tsunami_properties_gdp['YEAR'].astype('int')>1959) &(df_tsunami_properties_gdp['YEAR'].astype('int')<2021)]
 
