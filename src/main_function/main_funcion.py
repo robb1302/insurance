@@ -12,13 +12,13 @@ def insurance_weather_model(country):
     data, geo_data = import_data(country)
 
     # prepare each data individually
-    data = prepare_data_creation(data, bool_return=True, bool_log=True)
+    data = prepare_data_creation(data, bool_return=True, bool_log=False)
 
     # analyze original data
     analyze_data(data)
 
     # merge different datasets
-    data = merge_data(data=data, geo_data=geo_data, bool_all_gdp=False)
+    data = merge_data(data=data, geo_data=geo_data, bool_all_gdp=True)
 
     # create model
     create_model(data, 'GDP_Value')
